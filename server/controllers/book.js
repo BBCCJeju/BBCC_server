@@ -206,18 +206,14 @@ exports.destroyAll = {
 exports.search = {
     description: '책 검색',
     tags: ['api'],
-    validate: {
-        query: {
-            keyword: Joi.string()
-        }
-    },
     auth: false,
     handler: function (request, reply) {
-
         Co(function* () {
             try {
-                if(request.query.keyword==undefined)
+                if (!request.query.keyword) {
+                    console.log("here");
                     return yield Book.find({});
+                }
                 
                 var book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
                 var book02 = yield Book.find({ title: '%' + request.query.keyword + '%' });
@@ -239,16 +235,20 @@ exports.search = {
                 };
 
                 //결과
-                var resultArr = book01.concat(book02, book03, book04, book05 ).unique(); 
+                var resultArr = book01.concat(book02, book03, book04, book05).unique();
 
                 return resultArr;
             }
             catch (err) {
+                console.log('1');
+                console.log(err);
                 throw err;
+
             }
         }).then(function (resultArr) {
             reply(resultArr);
         }).catch(function (err) {
+            console.log('2');
             return reply(Boom.badImplementation(err));
         });
 
