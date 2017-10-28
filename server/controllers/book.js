@@ -216,21 +216,31 @@ exports.search = {
 
         Co(function* () {
             try {
-                var book01 = [],
-                book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
+                var book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
                 var book02 = yield Book.find({ title: '%' + request.query.keyword + '%' });
                 var book03 = yield Book.find({ author: '%' + request.query.keyword + '%' });
                 var book04 = yield Book.find({ publisher: '%' + request.query.keyword + '%' });
                 var book05 = yield Book.find({ publishYear: '%' + request.query.keyword + '%' });
 
-                var resultArr = {
-                    isbnRes: book01,
-                    titleRes: book02,
-                    authorRes: book03,
-                    publisherRes: book04,
-                    publishYearRes: book05
-                }
 
+                //
+                Array.prototype.unique = function () {
+                    var a = this.concat();
+                    for (var i = 0; i < a.length; ++i) {
+                        for (var j = i + 1; j < a.length; ++j) {
+                            if (a[i] === a[j])
+                                a.splice(j--, 1);
+                        }
+                    }
+
+                    return a;
+                };
+
+                //결과
+
+                var resultArr = book01.concat(book02, book03, book04, book05 ).unique(); 
+
+        
                 return resultArr;
             }
             catch (err) {
