@@ -35,7 +35,7 @@ module.exports = {
             required: true     
         },
         publishYear:{
-            type: 'string',
+            type: 'integer',
             required: true     
         }
         

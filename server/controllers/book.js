@@ -7,7 +7,8 @@
 'use strict';
 
 const Boom = require('boom'),
-    Joi = require('joi');
+    Joi = require('joi'),
+    Co = require('co');
 
 
 /*********************************************************************** 
@@ -26,7 +27,7 @@ exports.create = {
             img: Joi.string().required(),
             author: Joi.string().required(),
             publisher: Joi.string().required(),
-            publishYear: Joi.string().required()
+            publishYear: Joi.number().required()
         }
     }
     ,
@@ -65,7 +66,7 @@ exports.find = {
                     return reply(Boom.badImplementation(err));
                 }
                 reply(book);
-        });
+            });
     }
 };
 
@@ -88,7 +89,7 @@ exports.findAll = {
                     return reply(Boom.badImplementation(err));
                 }
                 reply(book);
-        });
+            });
     }
 };
 // // create new data
@@ -134,13 +135,13 @@ exports.update = {
             img: Joi.string().required(),
             author: Joi.string().required(),
             publisher: Joi.string().required(),
-            publishYear: Joi.string().required()
+            publishYear: Joi.number().required()
         }
     },
     auth: false,
     handler: (request, reply) => {
         // 수정
-        Book.update({isbn: request.params.isbn}, request.payload)
+        Book.update({ isbn: request.params.isbn }, request.payload)
             .exec((err, book) => {
                 // 결과
                 if (err) {
@@ -166,13 +167,13 @@ exports.destroy = {
     auth: false,
     handler: (request, reply) => {
         // 삭제
-        Book.destroy({id: request.params.isbn})
+        Book.destroy({ id: request.params.isbn })
             .exec((err) => {
                 // 결과
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
-                reply({result: true});
+                reply({ result: true });
             });
     }
 };
@@ -193,7 +194,53 @@ exports.destroyAll = {
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
-                reply({result: true});
+                reply({ result: true });
             });
+    }
+};
+
+/*********************************************************************** 
+ *                              - 모든 검색
+*************************************************************************/
+//search data
+exports.search = {
+    description: '책 검색',
+    tags: ['api'],
+    validate: {
+        query: {
+            keyword: Joi.string().required()
+        }
+    },
+    auth: false,
+    handler: function (request, reply) {
+
+        Co(function* () {
+            try {
+                var book01 = [],
+                book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
+                var book02 = yield Book.find({ title: '%' + request.query.keyword + '%' });
+                var book03 = yield Book.find({ author: '%' + request.query.keyword + '%' });
+                var book04 = yield Book.find({ publisher: '%' + request.query.keyword + '%' });
+                var book05 = yield Book.find({ publishYear: '%' + request.query.keyword + '%' });
+
+                var resultArr = {
+                    isbnRes: book01,
+                    titleRes: book02,
+                    authorRes: book03,
+                    publisherRes: book04,
+                    publishYearRes: book05
+                }
+
+                return resultArr;
+            }
+            catch (err) {
+                throw err;
+            }
+        }).then(function (resultArr) {
+            reply(resultArr);
+        }).catch(function (err) {
+            return reply(Boom.badImplementation(err));
+        });
+
     }
 };
