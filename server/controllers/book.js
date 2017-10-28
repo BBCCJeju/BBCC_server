@@ -27,12 +27,13 @@ exports.create = {
             img: Joi.string().required(),
             author: Joi.string().required(),
             publisher: Joi.string().required(),
-            publishYear: Joi.number().required()
+            publishYear: Joi.number().required(),
+            category: Joi.number().required()
         }
     }
     ,
     handler: (request, reply) => {
-        // 전체 조회
+        // 책 생성
         Book.create(request.payload)
             .exec((err, book) => {
                 // 결과
@@ -45,10 +46,10 @@ exports.create = {
 };
 
 /*********************************************************************** 
- *                              - 상세 책 조회 (R)
+ *                              - isbn으로 상세 책 조회 (R)
 *************************************************************************/
-exports.find = {
-    description: '상세 책 조회 (R)',
+exports.findByIsbn = {
+    description: 'isbn으로 상세 책 조회 (R)',
     notes: ' ',
     tags: ['api'],
     validate: {
@@ -69,6 +70,36 @@ exports.find = {
             });
     }
 };
+
+
+/*********************************************************************** 
+ *                              - category로 책 목록 조회 (R)
+*************************************************************************/
+exports.findByCategory = {
+    description: 'category로 책 목록 조회 (R)',
+    notes: ' ',
+    tags: ['api'],
+    validate: {
+        params: {
+            category: Joi.number().required()
+        }
+    },
+    auth: false,
+    handler: (request, reply) => {
+        // 조회
+        Book.find(request.params)
+            .exec((err, book) => {
+                // 결과
+                if (err) {
+                    return reply(Boom.badImplementation(err));
+                }
+                reply(book);
+            });
+    }
+};
+
+
+
 
 
 
@@ -92,31 +123,6 @@ exports.findAll = {
             });
     }
 };
-// // create new data
-// exports.create = {
-//     description: '생성',
-//     notes: ' ',
-//     tags: ['api'],
-//     validate: {
-//         payload: {
-//             attr1: Joi.string().required(),
-//             attr2: Joi.string().required()
-//         }
-//     },
-//     auth: false,
-//     handler: (request, reply) => {
-//         // 생성
-//         Book.create(request.payload)
-//             .exec((err, book) => {
-//                 // 결과
-//                 if (err) {
-//                     return reply(Boom.badImplementation(err));
-//                 }
-//                 reply(book);
-//         });
-//     }
-// };
-
 
 /*********************************************************************** 
  *                              - 책 수정 (U)
@@ -135,7 +141,8 @@ exports.update = {
             img: Joi.string().required(),
             author: Joi.string().required(),
             publisher: Joi.string().required(),
-            publishYear: Joi.number().required()
+            publishYear: Joi.number().required(),
+            category: Joi.number().required()
         }
     },
     auth: false,
@@ -214,7 +221,7 @@ exports.search = {
                     console.log("here");
                     return yield Book.find({});
                 }
-                
+
                 var book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
                 var book02 = yield Book.find({ title: '%' + request.query.keyword + '%' });
                 var book03 = yield Book.find({ author: '%' + request.query.keyword + '%' });

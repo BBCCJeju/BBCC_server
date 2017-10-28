@@ -37,6 +37,10 @@ module.exports = {
         publishYear:{
             type: 'integer',
             required: true     
+        },
+        category:{
+            type: 'integer',
+            required: true
         }
         
     }
