@@ -208,7 +208,7 @@ exports.search = {
     tags: ['api'],
     validate: {
         query: {
-            keyword: Joi.string().required()
+            keyword: Joi.string()
         }
     },
     auth: false,
@@ -216,14 +216,17 @@ exports.search = {
 
         Co(function* () {
             try {
+
+                if(request.query.keyword==null)
+                    return yield Book.find({});
+                
                 var book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
                 var book02 = yield Book.find({ title: '%' + request.query.keyword + '%' });
                 var book03 = yield Book.find({ author: '%' + request.query.keyword + '%' });
                 var book04 = yield Book.find({ publisher: '%' + request.query.keyword + '%' });
                 var book05 = yield Book.find({ publishYear: '%' + request.query.keyword + '%' });
 
-
-                //
+                //array merge
                 Array.prototype.unique = function () {
                     var a = this.concat();
                     for (var i = 0; i < a.length; ++i) {
@@ -237,10 +240,8 @@ exports.search = {
                 };
 
                 //결과
-
                 var resultArr = book01.concat(book02, book03, book04, book05 ).unique(); 
 
-        
                 return resultArr;
             }
             catch (err) {
