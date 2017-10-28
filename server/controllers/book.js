@@ -216,8 +216,7 @@ exports.search = {
 
         Co(function* () {
             try {
-
-                if(request.query.keyword==null)
+                if(request.query.keyword==undefined)
                     return yield Book.find({});
                 
                 var book01 = yield Book.find({ isbn: '%' + request.query.keyword + '%' });
